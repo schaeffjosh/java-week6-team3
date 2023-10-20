@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class JdbcParkDaoTests extends BaseDaoTests {
@@ -19,7 +20,15 @@ public class JdbcParkDaoTests extends BaseDaoTests {
 
     @Test
     public void getParks_Should_Return_All_Parks() {
-        Assert.fail();
+    List<Park> parks = dao.getParks();
+    Assert.assertNotNull(parks);
+    assertParksMatch(1, parks.get(0));
+    assertParksMatch(2, parks.get(1));
+
     }
 
+    private void assertParksMatch(int id , Park actual) {
+        Assert.assertEquals("Park id doesn't match", id, actual.getParkId());
+
+    }
 }

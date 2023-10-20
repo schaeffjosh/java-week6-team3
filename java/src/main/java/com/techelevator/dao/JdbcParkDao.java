@@ -1,6 +1,9 @@
 package com.techelevator.dao;
 
+import com.techelevator.exception.DaoException;
 import com.techelevator.model.Park;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -18,7 +21,20 @@ public class JdbcParkDao implements ParkDao {
 
     @Override
     public List<Park> getParks() {
-        return new ArrayList<>();
+    List<Park> parks = new ArrayList<>();
+    String sql = "SELECT * FROM park;";
+    try{
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql);
+        while(result.next()){
+            Park park = mapRowToPark(result);
+            parks.add(park);
+        }
+    } catch(CannotGetJdbcConnectionException e){
+        throw new DaoException("Unable to connect to server or database");
+    } catch(DataIntegrityViolationException e){
+        throw new DaoException(("Data integrity violation"));
+    }
+    return parks;
     }
 
     private Park mapRowToPark(SqlRowSet results) {
