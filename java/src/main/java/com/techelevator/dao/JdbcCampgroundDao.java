@@ -1,6 +1,9 @@
 package com.techelevator.dao;
 
+import com.techelevator.exception.DaoException;
 import com.techelevator.model.Campground;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -18,12 +21,38 @@ public class JdbcCampgroundDao implements CampgroundDao {
 
     @Override
     public Campground getCampgroundById(int id) {
-        return null;
+        Campground campground = null;
+        String sql = "SELECT * FROM campground WHERE campground_id = ?;";
+        try{
+            SqlRowSet result = jdbcTemplate.queryForRowSet(sql, id);
+            if(result.next()){
+                campground = mapRowToCampground(result);
+            }
+
+        } catch(CannotGetJdbcConnectionException e){
+            throw new DaoException("Unable to connect to server or database");
+        } catch(DataIntegrityViolationException e){
+            throw new DaoException(("Data integrity violation"));
+        }
+        return campground;
     }
 
     @Override
     public List<Campground> getCampgroundsByParkId(int parkId) {
-        return new ArrayList<>();
+        List<Campground> campgrounds = new ArrayList<>();
+        String sql = "SELECT * FROM campground WHERE park_id = ?;";
+        try{
+            SqlRowSet result = jdbcTemplate.queryForRowSet(sql, parkId);
+            while(result.next()){
+                Campground campground = mapRowToCampground(result);
+                campgrounds.add(campground);
+            }
+        }catch(CannotGetJdbcConnectionException e){
+            throw new DaoException("Unable to connect to server or database");
+        } catch(DataIntegrityViolationException e){
+            throw new DaoException(("Data integrity violation"));
+        }
+        return campgrounds;
     }
 
     private Campground mapRowToCampground(SqlRowSet results) {
